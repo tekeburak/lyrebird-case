@@ -24,9 +24,9 @@ def main():
         default='weights/RealESRGAN_x4plus.pth',
         help='Path to the pre-trained model')
     parser.add_argument('--batch_size', type=int, default=4, help='Batch size for image enhancement')
-    parser.add_argument('--scale', type=int, default=3.5, help='Upsample scale factor')
+    parser.add_argument('--scale', type=int, default=4, help='Upsample scale factor')
     parser.add_argument('--suffix', type=str, default='out', help='Suffix of the restored image')
-    parser.add_argument('--tile', type=int, default=0, help='Tile size, 0 for no tile during testing')
+    parser.add_argument('--tile', type=int, default=200, help='Tile size, 0 for no tile during testing')
     parser.add_argument('--tile_pad', type=int, default=10, help='Tile padding')
     parser.add_argument('--pre_pad', type=int, default=0, help='Pre padding size at each border')
     parser.add_argument('--half', type=bool, default=False, help='Half precision')
@@ -228,8 +228,8 @@ class RealESRGANer():
         """Modified from: https://github.com/ata4/esrgan-launcher
         """
         batch, channel, height, width = self.img.shape
-        output_height = height * self.scale
-        output_width = width * self.scale
+        output_height = int(height * self.scale)
+        output_width = int(width * self.scale)
         output_shape = (batch, channel, output_height, output_width)
 
         # start with black image
@@ -270,16 +270,16 @@ class RealESRGANer():
                 print(f'\tTile {tile_idx}/{tiles_x * tiles_y}')
 
                 # output tile area on total image
-                output_start_x = input_start_x * self.scale
-                output_end_x = input_end_x * self.scale
-                output_start_y = input_start_y * self.scale
-                output_end_y = input_end_y * self.scale
+                output_start_x = int(input_start_x * self.scale)
+                output_end_x = int(input_end_x * self.scale)
+                output_start_y = int(input_start_y * self.scale)
+                output_end_y = int(input_end_y * self.scale)
 
                 # output tile area without padding
-                output_start_x_tile = (input_start_x - input_start_x_pad) * self.scale
-                output_end_x_tile = output_start_x_tile + input_tile_width * self.scale
-                output_start_y_tile = (input_start_y - input_start_y_pad) * self.scale
-                output_end_y_tile = output_start_y_tile + input_tile_height * self.scale
+                output_start_x_tile = int((input_start_x - input_start_x_pad) * self.scale)
+                output_end_x_tile = int(output_start_x_tile + input_tile_width * self.scale)
+                output_start_y_tile = int((input_start_y - input_start_y_pad) * self.scale)
+                output_end_y_tile = int(output_start_y_tile + input_tile_height * self.scale)
 
                 # put tile into output image
                 self.output[:, :, output_start_y:output_end_y,
